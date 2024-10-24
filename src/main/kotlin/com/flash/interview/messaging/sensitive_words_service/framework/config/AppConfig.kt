@@ -2,15 +2,23 @@ package com.flash.interview.messaging.sensitive_words_service.framework.config
 
 import io.swagger.v3.oas.models.info.Info
 import org.springdoc.core.models.GroupedOpenApi
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 
+
 @Configuration
-class AppConfig {
+class AppConfig(
+    private var defaultUser: DefaultUserCredentialsConfig
+) {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -27,6 +35,20 @@ class AppConfig {
             .httpBasic(Customizer.withDefaults())
         return http.build()
     }
+
+    @Bean
+    fun  userDetailsService(): InMemoryUserDetailsManager {
+        println("This is the default user: $defaultUser")
+        val user = User
+            .withUsername(defaultUser.username)
+            .password(passwordEncoder().encode(defaultUser.password))
+            .roles(defaultUser.role)
+            .build();
+        return InMemoryUserDetailsManager(user)
+    }
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder(8)
 
     @Bean
     fun publicApi(): GroupedOpenApi {

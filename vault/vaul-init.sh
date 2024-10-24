@@ -8,8 +8,15 @@ done
 echo "Authenticating to vault..."
 vault login token=vault-plaintext-root-token
 echo "Initializing vault..."
-vault secrets enable -version=2 -path=sensitive-words/secrets kv
+# Enable KV v2 secrets engine at the 'secrets' path
+vault secrets enable -version=2 -path=secrets kv
+
 echo "Adding entries..."
-vault kv put my.secrets/dev username=test_user
-vault kv put my.secrets/dev password=test_password
+# Put the key-value pairs under the 'sensitive-words-service' path
+vault kv put secrets/sensitive-words-service \
+    spring.datasource.username=test_user \
+    spring.datasource.password=test_password \
+    app.config.auth.token=vault-plaintext-root-token \
+    spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=sensitive_words;trustServerCertificate=true
+
 echo "Complete..."

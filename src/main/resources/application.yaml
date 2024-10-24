@@ -1,3 +1,10 @@
+app:
+  config:
+    auth:
+      username: ${SPRING_SECURITY_USER_NAME:interviewUser}
+      password: ${SPRING_SECURITY_USER_PASSWORD:reallyNotSafePassword}
+      role: ${SPRING_SECURITY_USER_ROLE:admin}
+
 server:
   port: 8080
 spring:
@@ -7,10 +14,13 @@ spring:
     vault:
       enabled: true
       uri: http://localhost:8200
-      token: ${SPRING_SECURITY_USER_NAME:vault-plaintext-root-token}
+      token: ${VAULT_AUTH_ROOT_TOKEN:vault-plaintext-root-token}
       kv:
         enabled: true
         backend: secret
+        default-context: application
+  config:
+    import: vault://
   docker:
     compose:
       enabled: true
@@ -19,11 +29,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  security:
-    user:
-      name: ${SPRING_SECURITY_USER_NAME:interviewUser}
-      password: ${SPRING_SECURITY_USER_PASSWORD:reallyNotSafePassword}
-      role: ${SPRING_SECURITY_USER_ROLE:admin}
+
 
 springdoc:
   api-docs:
