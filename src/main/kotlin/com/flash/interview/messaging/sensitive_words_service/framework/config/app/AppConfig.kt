@@ -37,7 +37,6 @@ class AppConfig(
 
     @Bean
     fun  userDetailsService(): InMemoryUserDetailsManager {
-        println("This is the default user: $defaultUser")
         val user = User
             .withUsername(defaultUser.username)
             .password(passwordEncoder().encode(defaultUser.password))

@@ -34,15 +34,23 @@ The Sensitive Words API provides a service for managing sensitive words, allowin
 git clone https://github.com/yourusername/sensitive-words-api.git
 cd sensitive-words-api
 ``` 
+### Configure Credentials (Optional)
+There are two types of credentials that you may want to set before you continue.
+The credentials for the default user - in the `application.yaml`; and the local database - in the `docker-compose.yaml`.
+For example, for MS SQL Server:
+```yaml
+app:
+  config:
+    auth:
+      username: ${SPRING_SECURITY_USER_NAME:interviewUser}
+      password: ${SPRING_SECURITY_USER_PASSWORD:reallyNotSafePassword}
+      role: ${SPRING_SECURITY_USER_ROLE:admin}
+```
 
 ### Build the Project
 ```bash
   ./gradlew build
-```
-  
-### Configure Credentials
-There are two
-Ensure your application.yml (or application.properties) file is set up for your database connection. For example, for MS SQL Server:
+``` 
 
 ### Running the Application
 To run the application, execute:

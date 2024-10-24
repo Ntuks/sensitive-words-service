@@ -7,7 +7,6 @@ import com.flash.interview.messaging.sensitive_words_service.adapters.`in`.dtos.
 import com.flash.interview.messaging.sensitive_words_service.domain.application.SensitiveWordService
 import com.flash.interview.messaging.sensitive_words_service.domain.models.RedactedMessage
 import com.flash.interview.messaging.sensitive_words_service.domain.models.SensitiveWord
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
@@ -38,7 +37,7 @@ class MessagingControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = ["ADMIN"]) // Simulate a logged-in user for admin endpoints
+    @WithMockUser(username = "interviewUser", password = "reallyNotSafePassword", roles = ["admin"]) // Simulate a logged-in user for admin endpoints
     fun `should add sensitive word successfully`() {
         val request = CreateSensitiveWordsRequest(setOf("badword"))
 

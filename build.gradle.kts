@@ -72,3 +72,11 @@ kotlin {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+tasks.jar {
+	manifest {
+		attributes(
+			"Main-Class" to "com.flash.interview.messaging.sensitive_words_service.SensitiveWordsServiceApplicationKt"  // Replace with your actual main class
+		)
+	}
+}
