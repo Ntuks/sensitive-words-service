@@ -1,4 +1,4 @@
-package com.flash.interview.messaging.sensitive_words_service.framework.config
+package com.flash.interview.messaging.sensitive_words_service.framework.config.app
 
 import jakarta.validation.ConstraintViolationException
 import org.springframework.http.HttpStatus

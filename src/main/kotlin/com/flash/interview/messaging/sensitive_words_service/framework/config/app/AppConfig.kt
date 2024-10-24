@@ -1,8 +1,7 @@
-package com.flash.interview.messaging.sensitive_words_service.framework.config
+package com.flash.interview.messaging.sensitive_words_service.framework.config.app
 
 import io.swagger.v3.oas.models.info.Info
 import org.springdoc.core.models.GroupedOpenApi
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer

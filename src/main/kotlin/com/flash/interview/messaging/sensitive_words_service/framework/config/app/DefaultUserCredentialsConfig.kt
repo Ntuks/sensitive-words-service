@@ -1,4 +1,4 @@
-package com.flash.interview.messaging.sensitive_words_service.framework.config
+package com.flash.interview.messaging.sensitive_words_service.framework.config.app
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
