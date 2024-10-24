@@ -5,13 +5,13 @@ import com.flash.interview.messaging.sensitive_words_service.domain.models.Redac
 data class MessageResponse(
     val originalMessage: String,
     val redactedMessage: String,
-    val redactedWordCount: Int
+    val redactedWordsCount: Int
 ) {
     companion object {
-        fun RedactedMessage.toMessageResponse(originalMessage: String) = MessageResponse (
-            redactedMessage = message,
+        fun RedactedMessage.toMessageResponse(originalMessage: String, redactedWordsCount: Int) = MessageResponse (
+            redactedMessage = content,
             originalMessage = originalMessage,
-            redactedWordCount = sensitiveWords.size
+            redactedWordsCount = redactedWordsCount
         )
     }
 }

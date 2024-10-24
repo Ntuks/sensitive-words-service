@@ -18,11 +18,11 @@ class CustomExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleConstraintViolationException(ex: ConstraintViolationException): ResponseEntity<String> {
-        return ResponseEntity("Validation failed: ${ex.message}", HttpStatus.BAD_REQUEST)
+        return ResponseEntity("{error: ${ex.message}}", HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)
     fun handleAllOtherExceptions(ex: Exception): ResponseEntity<String> {
-        return ResponseEntity("Server error: ${ex.message}", HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity("{error: ${ex.message}}", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 }

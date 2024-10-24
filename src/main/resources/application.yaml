@@ -1,0 +1,32 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: sensitive-words-service
+  cloud:
+    vault:
+      enabled: true
+      uri: http://localhost:8200
+      token: ${SPRING_SECURITY_USER_NAME:vault-plaintext-root-token}
+      kv:
+        enabled: true
+        backend: secret
+  docker:
+    compose:
+      enabled: true
+      file: compose.yaml
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  security:
+    user:
+      name: ${SPRING_SECURITY_USER_NAME:interviewUser}
+      password: ${SPRING_SECURITY_USER_PASSWORD:reallyNotSafePassword}
+      role: ${SPRING_SECURITY_USER_ROLE:admin}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

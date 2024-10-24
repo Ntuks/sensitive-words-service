@@ -1,8 +1,15 @@
 package com.flash.interview.messaging.sensitive_words_service.domain.ports
 
+import com.flash.interview.messaging.sensitive_words_service.domain.models.SensitiveWord
+
 interface SensitiveWordsManagementPort {
-    fun getSensitiveWords(id: String): Result<List<String>>
-    fun createSensitiveWords(): Result<Unit>
-    fun updateSensitiveWords(): Result<Unit>
-    fun deleteSensitiveWord(): Result<String>
+    fun createSensitiveWords(sensitiveWords: Set<String>): Result<List<SensitiveWord>>
+
+    fun getSensitiveWord(id: String): Result<SensitiveWord>
+
+    fun getSensitiveWords(): Result<List<SensitiveWord>>
+
+    fun updateSensitiveWords(sensitiveWord: SensitiveWord): Result<SensitiveWord>
+
+    fun deleteSensitiveWord(id: String): Result<Unit>
 }

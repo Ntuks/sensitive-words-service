@@ -1,5 +1,16 @@
+version: "3.8"
 services:
-  sqlserver:
+  sensitive-words-service:
+    container_name: sensitive-words-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sensitive-words-service:0.0.1
+    ports:
+      - 8080:8080
+#    networks:
+#      - spring-cloud-network
+  mssql-server:
     image: 'mcr.microsoft.com/mssql/server:latest'
     environment:
       - 'ACCEPT_EULA=yes'
@@ -7,3 +18,40 @@ services:
       - 'MSSQL_SA_PASSWORD=verYs3cret'
     ports:
       - '1433'
+    labels:
+      org.springframework.boot.jdbc.parameters: 'ssl=true&sslmode=require'
+  vault-server:
+    image: hashicorp/vault:latest
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_DEV_ROOT_TOKEN_ID: "vault-plaintext-root-token"
+    volumes:
+      - ./vault/data:/vault/file
+    cap_add:
+      - IPC_LOCK
+    networks:
+      vault-network:
+        ipv4_address: 172.21.0.10
+        aliases:
+          - vault-server
+  vault-client:
+    container_name: vault-client
+    build:
+      context: vault/
+      dockerfile: Dockerfile
+    environment:
+      VAULT_ADDR: "http://vault-server:8200"
+    networks:
+      vault-network:
+        ipv4_address: 172.21.0.20
+        aliases:
+          - vault-client
+networks:
+  vault-network:
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+

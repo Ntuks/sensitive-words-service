@@ -20,7 +20,7 @@ repositories {
 
 extra["springCloudVersion"] = "2023.0.3"
 extra["openTelemetryVersion"] = "1.28.0"
-extra["springDocVersion"] = "1.7.0"
+extra["springDocVersion"] = "1.8.0"
 
 dependencies {
 	// Spring Boot dependencies
@@ -36,15 +36,11 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-	// OpenTelemetry
-	implementation("io.opentelemetry:opentelemetry-api:${property("openTelemetryVersion")}")
-	implementation("io.opentelemetry:opentelemetry-sdk:${property("openTelemetryVersion")}")
-	implementation("io.opentelemetry:opentelemetry-exporter-otlp:${property("openTelemetryVersion")}")
-	implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${property("openTelemetryVersion")}")
+	// Logging
+	implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
 
 	// Springdoc OpenAPI for Swagger
-	implementation("org.springdoc:springdoc-openapi-ui:${property("springDocVersion")}")
-	implementation("org.springdoc:springdoc-openapi-kotlin:${property("springDocVersion")}")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
 	// Database dependencies (if applicable)
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -52,13 +48,17 @@ dependencies {
 
 	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+	testImplementation("io.mockk:mockk:1.12.0")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 dependencyManagement {
 	imports {
+//		mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.6.0")
 		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
 	}
 }

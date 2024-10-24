@@ -1,6 +1,6 @@
 package com.flash.interview.messaging.sensitive_words_service.domain.models
 
-data class InputMessage(
+data class SensitiveWord(
     val id: String,
-    val message: String,
+    val text: String
 )
