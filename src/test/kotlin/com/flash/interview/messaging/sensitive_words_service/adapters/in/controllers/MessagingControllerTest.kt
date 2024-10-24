@@ -2,17 +2,18 @@ package com.flash.interview.messaging.sensitive_words_service.adapters.`in`.cont
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.flash.interview.messaging.sensitive_words_service.adapters.`in`.dtos.CreateSensitiveWordsRequest
-import com.flash.interview.messaging.sensitive_words_service.adapters.`in`.dtos.UpdateSensitiveWordRequest
+import com.flash.interview.messaging.sensitive_words_service.adapters.`in`.dtos.*
 import com.flash.interview.messaging.sensitive_words_service.domain.application.SensitiveWordService
+import com.flash.interview.messaging.sensitive_words_service.domain.application.TestSecurityConfig
 import com.flash.interview.messaging.sensitive_words_service.domain.models.RedactedMessage
 import com.flash.interview.messaging.sensitive_words_service.domain.models.SensitiveWord
-import org.junit.jupiter.api.BeforeEach
+import io.mockk.every
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest(MessagingController::class)
+@Import(TestSecurityConfig::class)
 class MessagingControllerTest {
 
     @Autowired
@@ -31,31 +33,35 @@ class MessagingControllerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @BeforeEach
-    fun setUp() {
-        // Setup can be done here if needed
-    }
 
     @Test
-    @WithMockUser(username = "interviewUser", password = "reallyNotSafePassword", roles = ["admin"]) // Simulate a logged-in user for admin endpoints
+    @WithMockUser(username = "admin", password = "password", roles = ["admin"]) // Simulate a logged-in user for admin endpoints
     fun `should add sensitive word successfully`() {
         val request = CreateSensitiveWordsRequest(setOf("badword"))
 
         mockMvc.perform(
             post("/api/v1/messages/admin/addSensitiveWord")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo { println(it.response.contentAsString) }
+            .andDo { println(it.response.status) }
+            .andDo { println(it.response.errorMessage) }
             .andExpect(status().isOk)
             .andExpect(content().string("Word added successfully"))
 
-        verify(sensitiveWordService, times(1)).createSensitiveWords(any())
+        verify(sensitiveWordService, times(1)).createSensitiveWords(request.sensitiveWords)
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "admin", password = "admin", roles = ["admin"])
     fun `should get sensitive words successfully`() {
         val sensitiveWords = listOf("badword", "anotherBadWord")
+        val sensitiveWordsResponse = SensitiveWordsResponse(
+            sensitiveWords = listOf(
+                SensitiveWord(id = "0", text = sensitiveWords[0]),
+                SensitiveWord(id = "1", text = sensitiveWords[1])
+            )
+        )
         val expectedWords = sensitiveWords.mapIndexed { id: Int, test: String ->
             SensitiveWord(id.toString(), test)
         }
@@ -63,34 +69,42 @@ class MessagingControllerTest {
             .thenReturn(Result.success(expectedWords))
 
         mockMvc.perform(get("/api/v1/messages/admin/getSensitiveWords"))
+            .andDo { println(it.response.contentAsString) }
+            .andDo { println(it.response.status) }
+            .andDo { println(it.response.errorMessage) }
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.sensitiveWords[0]").value("badword"))
-            .andExpect(jsonPath("$.sensitiveWords[1]").value("anotherBadWord"))
+            .andExpect(content().string(objectMapper.writeValueAsString(sensitiveWordsResponse)))
 
         verify(sensitiveWordService, times(1)).getSensitiveWords()
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "admin", password = "admin", roles = ["admin"])
     fun `should update sensitive word successfully`() {
-        val request = UpdateSensitiveWordRequest(id = "1", text = "updatedBadword")
+        val request = UpdateSensitiveWordRequest(id = "1", text = "firstWord")
         val updatedWord = SensitiveWord(id = "1", text = "updatedBadword")
-        `when`(sensitiveWordService.updateSensitiveWords(any())).thenReturn(Result.success(updatedWord))
+        val response = SensitiveWordsResponse(listOf(updatedWord))
+        `when`(sensitiveWordService.updateSensitiveWords(
+            sensitiveWord = SensitiveWord(request.id, request.text)
+        )).thenReturn(Result.success(updatedWord))
 
         mockMvc.perform(
             put("/api/v1/messages/admin/updateSensitiveWord")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
+            .andDo { println(it.response.contentAsString) }
+            .andDo { println(it.response.status) }
+            .andDo { println(it.response.errorMessage) }
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sensitiveWords[0].text").value("updatedBadword"))
+            .andExpect(content().string(objectMapper.writeValueAsString(response)))
 
-        verify(sensitiveWordService, times(1)).updateSensitiveWords(any())
+        verify(sensitiveWordService, times(1)).updateSensitiveWords(updatedWord.copy(text = request.text))
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "admin", password = "password", roles = ["admin"])
     fun `should delete sensitive word successfully`() {
         val id = "1"
 
@@ -104,23 +118,31 @@ class MessagingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "admin", password = "password", roles = ["admin"])
     fun `should redact message successfully`() {
-        val message = "This is a badword in the message."
-        val redactedMessage = "This is a ***** in the message."
-        `when`(sensitiveWordService.redactSensitiveWords(message))
+        val request = MessageRequest("This is a badword in the message.")
+        val redactedMessage = RedactedMessage("This is a ***** in the message.")
+        val response = MessageResponse(
+            originalMessage = request.message,
+            redactedMessage = redactedMessage.content,
+            redactedWordsCount = 1
+        )
+        `when`(sensitiveWordService.redactSensitiveWords(request.message))
             .thenReturn(
-                Result.success(RedactedMessage(redactedMessage) to 1)
+                Result.success(redactedMessage to 1)
             )
 
         mockMvc.perform(
             post("/api/v1/messages/redact")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(message))
+                .content(objectMapper.writeValueAsString(request))
         )
+            .andDo { println(it.response.contentAsString) }
+            .andDo { println(it.response.status) }
+            .andDo { println(it.response.errorMessage) }
             .andExpect(status().isOk)
-            .andExpect(content().string(redactedMessage))
+            .andExpect(content().string(objectMapper.writeValueAsString(response)))
 
-        verify(sensitiveWordService, times(1)).redactSensitiveWords(message)
+        verify(sensitiveWordService, times(1)).redactSensitiveWords(request.message)
     }
 }
