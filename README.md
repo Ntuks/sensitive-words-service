@@ -53,7 +53,13 @@ app:
 ``` 
 
 ### Running the Application
-To run the application, execute:
+To run the application, you need to ensure that the db and vault server are running by running:
+```bash
+docker-compose up --build
+```
+
+Since the is currently an issue with running the docker container for the app,
+Then run the application:
 ```bash
 ./gradlew bootRun
 ```
